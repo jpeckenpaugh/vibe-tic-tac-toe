@@ -71,3 +71,21 @@ Use the **Options** menu on the title screen to:
 - Reset the leaderboard stats
 
 Your preferences and leaderboard are saved in your browser's local storage.
+
+## Development Session
+
+This project was built in a single OpenCode coding session. The session overview below shows the token usage, cost, and context composition for that build.
+
+![Session token usage and cost](open-code-deep-seek-token-usage-cost-overview.png)
+
+**Session:** "Tic-tac-toe game in single HTML page"
+**Provider / Model:** OpenCode Go · DeepSeek V4 Flash
+
+- Context limit: **1,000,000 tokens** (about 8% used)
+- Total tokens: **83,672** (83,456 cached reads, 193 input, 23 output)
+- Messages: **198** (26 user, 172 assistant)
+- Context composition: 59.1% tool calls, 38.3% assistant, 2.1% user, 0.5% other
+- Total cost: **$0.15**
+- Session duration: roughly **33 minutes**
+
+Notably, almost all of the 83.7K tokens were cached context reads, and tool calls made up the majority of the context — yet the entire session cost only 15 cents.
