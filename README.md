@@ -6,6 +6,12 @@ A simple single-page tic-tac-toe game built with plain HTML, CSS, and JavaScript
 
 Two players take turns placing their symbol on a 3x3 grid, trying to line up three in a row (horizontally, vertically, or diagonally). The first to do so wins; if the board fills with no winner, the game is a draw.
 
+## Screenshots
+
+![Title screen](screenshot-title.png)
+
+![Gameplay](screenshot-game.png)
+
 ## Features
 
 - Title screen with Start Game, Leaderboard, Options, and About
