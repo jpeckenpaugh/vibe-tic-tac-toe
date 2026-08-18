@@ -4,296 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic-Tac-Toe</title>
-  <style>
-    :root {
-      --cell-size: 100px;
-      --cell-font: 2.5rem;
-      --gap: 8px;
-      --title-size: 4rem;
-      --subtitle-size: 1.2rem;
-      --status-size: 1.2rem;
-    }
-    @media (min-width: 900px) {
-      :root {
-        --cell-size: 140px;
-        --cell-font: 3.6rem;
-        --gap: 12px;
-        --title-size: 5.5rem;
-        --subtitle-size: 1.6rem;
-        --status-size: 1.6rem;
-      }
-    }
-    @media (min-width: 1400px) {
-      :root {
-        --cell-size: 180px;
-        --cell-font: 4.6rem;
-        --gap: 16px;
-        --title-size: 7rem;
-        --subtitle-size: 2rem;
-        --status-size: 2rem;
-      }
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      background: #f0f4f8;
-    }
-    h1 {
-      color: #1e293b;
-    }
-    #status {
-      font-size: var(--status-size);
-      margin-bottom: 16px;
-      color: #475569;
-      min-height: 1.5em;
-    }
-    #board {
-      display: grid;
-      grid-template-columns: repeat(3, var(--cell-size));
-      grid-template-rows: repeat(3, var(--cell-size));
-      gap: var(--gap);
-    }
-    .cell {
-      width: var(--cell-size);
-      height: var(--cell-size);
-      font-size: var(--cell-font);
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-      color: #1e293b;
-      transition: background 0.15s;
-    }
-    .cell:hover:not(:disabled) {
-      background: #e2e8f0;
-    }
-    .cell.preview:hover::after {
-      content: var(--preview, '');
-      opacity: 0.25;
-    }
-    .cell.win {
-      background: #dcfce7;
-      box-shadow: 0 0 0 3px #22c55e, 0 2px 6px rgba(0, 0, 0, 0.1);
-      animation: win-pulse 0.6s ease-in-out infinite alternate;
-    }
-    .cell.dim {
-      opacity: 0.3;
-    }
-    @keyframes win-pulse {
-      from { transform: scale(1); }
-      to { transform: scale(1.06); }
-    }
-    .cell.x {
-      color: #2563eb;
-    }
-    .cell.o {
-      color: #dc2626;
-    }
-    .cell:disabled {
-      cursor: default;
-    }
-    #reset {
-      margin-top: 20px;
-      padding: 10px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background: #1e293b;
-      color: #ffffff;
-      cursor: pointer;
-    }
-    #reset:hover {
-      background: #334155;
-    }
-    #game.hidden {
-      display: none;
-    }
-    #title-screen {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      z-index: 10;
-    }
-    #title-screen h1 {
-      font-size: var(--title-size);
-      color: #ffffff;
-      margin: 0 0 8px;
-    }
-    #title-screen p {
-      color: #94a3b8;
-      margin: 0 0 40px;
-      font-size: var(--subtitle-size);
-    }
-    #start {
-      padding: 14px 40px;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: #ffffff;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    #start:hover {
-      background: #1d4ed8;
-    }
-    @media (min-width: 900px) {
-      #start, #leaderboard-btn {
-        font-size: 1.6rem;
-        padding: 16px 48px;
-      }
-      #reset {
-        font-size: 1.4rem;
-        padding: 14px 32px;
-      }
-    }
-    #leaderboard-btn {
-      margin-top: 16px;
-      padding: 10px 24px;
-      font-size: 1rem;
-      border: 2px solid #475569;
-      border-radius: 8px;
-      background: transparent;
-      color: #cbd5e1;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    #leaderboard-btn:hover {
-      background: #475569;
-      color: #ffffff;
-    }
-    #leaderboard {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(15, 23, 42, 0.8);
-      z-index: 30;
-    }
-    #leaderboard.show {
-      display: flex;
-    }
-    .leaderboard-box {
-      background: #ffffff;
-      padding: 32px 48px;
-      border-radius: 16px;
-      text-align: center;
-      min-width: 260px;
-    }
-    .leaderboard-box h2 {
-      margin: 0 0 20px;
-      color: #1e293b;
-    }
-    .leaderboard-box table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 24px;
-    }
-    .leaderboard-box th, .leaderboard-box td {
-      padding: 8px 12px;
-      font-size: 1.1rem;
-    }
-    .leaderboard-box th {
-      color: #64748b;
-      font-weight: 600;
-      border-bottom: 2px solid #e2e8f0;
-    }
-    .leaderboard-box td {
-      color: #1e293b;
-    }
-    #leaderboard-close {
-      padding: 10px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background: #1e293b;
-      color: #ffffff;
-      cursor: pointer;
-    }
-    #leaderboard-close:hover {
-      background: #334155;
-    }
-    #game-over {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(15, 23, 42, 0.7);
-      z-index: 20;
-    }
-    #game-over.show {
-      display: flex;
-    }
-    .game-over-box {
-      background: #ffffff;
-      padding: 40px 60px;
-      border-radius: 16px;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      transform: scale(0.5);
-      opacity: 0;
-      animation: pop-in 0.4s ease-out forwards;
-    }
-    .game-over-box h2 {
-      margin: 0 0 8px;
-      font-size: 2.2rem;
-    }
-    .game-over-box h2.x {
-      color: #2563eb;
-    }
-    .game-over-box h2.o {
-      color: #dc2626;
-    }
-    .game-over-box p {
-      margin: 0;
-      color: #64748b;
-      font-size: 1.1rem;
-    }
-    .game-over-actions {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin-top: 24px;
-    }
-    .game-over-actions button {
-      padding: 10px 24px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    #play-again {
-      background: #2563eb;
-      color: #ffffff;
-    }
-    #play-again:hover {
-      background: #1d4ed8;
-    }
-    #to-menu {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-    #to-menu:hover {
-      background: #cbd5e1;
-    }
-    @keyframes pop-in {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="title-screen">
@@ -301,9 +12,11 @@
     <p>Two players, one winner.</p>
     <button id="start">Start Game</button>
     <button id="leaderboard-btn">Leaderboard</button>
+    <button id="options-btn">Options</button>
+    <button id="about-btn">About</button>
   </div>
 
-  <div id="game" class="hidden">
+  <div id="game">
     <h1>Tic-Tac-Toe</h1>
     <div id="status">Player X's turn</div>
     <div id="board"></div>
@@ -324,224 +37,111 @@
   <div id="leaderboard">
     <div class="leaderboard-box">
       <h2>Leaderboard</h2>
-      <table>
-        <tr>
-          <th>Player X</th>
-          <th>Player O</th>
-          <th>Draws</th>
-        </tr>
-        <tr>
-          <td id="lb-x">0</td>
-          <td id="lb-o">0</td>
-          <td id="lb-draws">0</td>
-        </tr>
-      </table>
+      <div class="stats">
+        <div class="stat-card x">
+          <span class="stat-icon">✕</span>
+          <span class="stat-value" id="lb-x">0</span>
+          <span class="stat-label">Wins</span>
+        </div>
+        <div class="stat-card o">
+          <span class="stat-icon">◯</span>
+          <span class="stat-value" id="lb-o">0</span>
+          <span class="stat-label">Wins</span>
+        </div>
+        <div class="stat-card draw">
+          <span class="stat-icon">＝</span>
+          <span class="stat-value" id="lb-draws">0</span>
+          <span class="stat-label">Draws</span>
+        </div>
+      </div>
       <button id="leaderboard-close">Close</button>
     </div>
   </div>
 
-  <script>
-    const boardEl = document.getElementById('board');
-    const statusEl = document.getElementById('status');
-    const resetBtn = document.getElementById('reset');
-    const startBtn = document.getElementById('start');
-    const titleScreen = document.getElementById('title-screen');
-    const gameEl = document.getElementById('game');
-    const gameOverEl = document.getElementById('game-over');
-    const gameOverTitle = document.getElementById('game-over-title');
-    const leaderboardBtn = document.getElementById('leaderboard-btn');
-    const leaderboardEl = document.getElementById('leaderboard');
-    const leaderboardClose = document.getElementById('leaderboard-close');
-    const lbX = document.getElementById('lb-x');
-    const lbO = document.getElementById('lb-o');
-    const lbDraws = document.getElementById('lb-draws');
-    const playAgainBtn = document.getElementById('play-again');
-    const toMenuBtn = document.getElementById('to-menu');
+  <div id="about">
+    <div class="about-box">
+      <h2>About</h2>
+      <p class="version">Tic-Tac-Toe <strong>v0.1.1</strong></p>
+      <ul>
+        <li>Title screen with Start Game, Leaderboard, Options, and About</li>
+        <li>Two-player local gameplay on a 3x3 board</li>
+        <li>Responsive layout that scales to your viewport</li>
+        <li>Win, loss, and draw tracking on a persistent leaderboard</li>
+        <li>Win-line highlight with color pop and dimming</li>
+        <li>Hover preview of your next move</li>
+        <li>Game-over overlay with Play Again and Menu</li>
+        <li>Confetti celebration on a win</li>
+        <li>Sound effects for moves, wins, and draws</li>
+        <li>Options menu: piece themes, symbol colors, and sound toggle</li>
+      </ul>
+      <button id="about-close">Close</button>
+    </div>
+  </div>
 
-    let audioCtx = null;
-    function ensureAudio() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      return audioCtx;
-    }
-    function playTone(freq, duration, type, gainValue, when) {
-      try {
-        const ctx = ensureAudio();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const t = ctx.currentTime + (when || 0);
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, t);
-        gain.gain.setValueAtTime(gainValue || 0.2, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(t);
-        osc.stop(t + duration);
-      } catch (e) {}
-    }
-    function playMove() {
-      playTone(440, 0.08, 'triangle', 0.15);
-    }
-    function playWin() {
-      playTone(523, 0.15, 'sine', 0.2);
-      playTone(659, 0.15, 'sine', 0.2, 0.15);
-      playTone(784, 0.25, 'sine', 0.2, 0.3);
-    }
-    function playDraw() {
-      playTone(330, 0.12, 'sine', 0.15);
-      playTone(294, 0.2, 'sine', 0.15, 0.15);
-    }
+  <div id="options">
+    <div class="options-box">
+      <h2>Options</h2>
 
-    const STORAGE_KEY = 'tic-tac-toe-stats';
-    let stats = loadStats();
+      <div class="option-group">
+        <label>Piece Theme</label>
+        <div class="theme-grid">
+          <button class="theme-option" data-theme="default" type="button">
+            <span class="theme-preview"><span class="tp-x">X</span><span class="tp-o">O</span></span>
+            <span class="theme-label">Classic</span>
+          </button>
+          <button class="theme-option" data-theme="cats" type="button">
+            <span class="theme-preview"><span class="tp-x">🐱</span><span class="tp-o">🐶</span></span>
+            <span class="theme-label">Cats &amp; Dogs</span>
+          </button>
+          <button class="theme-option" data-theme="stars" type="button">
+            <span class="theme-preview"><span class="tp-x">⭐</span><span class="tp-o">🌙</span></span>
+            <span class="theme-label">Stars &amp; Moon</span>
+          </button>
+          <button class="theme-option" data-theme="swords" type="button">
+            <span class="theme-preview"><span class="tp-x">⚔️</span><span class="tp-o">🛡️</span></span>
+            <span class="theme-label">Swords &amp; Shields</span>
+          </button>
+          <button class="theme-option" data-theme="hearts" type="button">
+            <span class="theme-preview"><span class="tp-x">❤️</span><span class="tp-o">💙</span></span>
+            <span class="theme-label">Hearts</span>
+          </button>
+          <button class="theme-option" data-theme="food" type="button">
+            <span class="theme-preview"><span class="tp-x">🍕</span><span class="tp-o">🍔</span></span>
+            <span class="theme-label">Pizza &amp; Burger</span>
+          </button>
+        </div>
+      </div>
 
-    function loadStats() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const data = raw ? JSON.parse(raw) : {};
-        return {
-          x: data.x || 0,
-          o: data.o || 0,
-          draws: data.draws || 0
-        };
-      } catch (e) {
-        return { x: 0, o: 0, draws: 0 };
-      }
-    }
+      <div class="option-group">
+        <label>Symbol Colors</label>
+        <div class="color-row">
+          <label class="color-picker">
+            <span class="color-label">X</span>
+            <input type="color" id="color-x" value="#2563eb">
+          </label>
+          <label class="color-picker">
+            <span class="color-label">O</span>
+            <input type="color" id="color-o" value="#dc2626">
+          </label>
+        </div>
+      </div>
 
-    function saveStats() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
-    }
+      <div class="option-group">
+        <label>Sound Effects</label>
+        <label class="toggle">
+          <input type="checkbox" id="sound-toggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
 
-    function recordResult(winner) {
-      if (winner === 'X') stats.x++;
-      else if (winner === 'O') stats.o++;
-      else stats.draws++;
-      saveStats();
-    }
+      <div class="option-group">
+        <label>Leaderboard</label>
+        <button id="reset-stats" type="button">Reset Stats</button>
+      </div>
 
-    let board = Array(9).fill(null);
-    let currentPlayer = 'X';
-    let gameOver = false;
-    let winningLine = null;
-
-    const winLines = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8],
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ];
-
-    function render() {
-      boardEl.innerHTML = '';
-      board.forEach((value, i) => {
-        const cell = document.createElement('button');
-        const isWinCell = winningLine && winningLine.includes(i);
-        cell.className = 'cell'
-          + (value ? ' ' + value.toLowerCase() : '')
-          + (isWinCell ? ' win' : '')
-          + (winningLine && !isWinCell ? ' dim' : '');
-        cell.textContent = value || '';
-        cell.disabled = !!value || gameOver;
-        if (!value && !gameOver) {
-          cell.classList.add('preview');
-          cell.style.setProperty('--preview', currentPlayer);
-        }
-        cell.addEventListener('click', () => handleMove(i));
-        boardEl.appendChild(cell);
-      });
-    }
-
-    function checkWinner() {
-      for (const line of winLines) {
-        const [a, b, c] = line;
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          return line;
-        }
-      }
-      return null;
-    }
-
-    function showGameOver(title, colorClass) {
-      gameOverTitle.textContent = title;
-      gameOverTitle.className = colorClass;
-      gameOverEl.classList.add('show');
-    }
-
-    function hideGameOver() {
-      gameOverEl.classList.remove('show');
-    }
-
-    function playAgain() {
-      hideGameOver();
-      reset();
-    }
-
-    function toMenu() {
-      hideGameOver();
-      gameEl.classList.add('hidden');
-      titleScreen.style.display = 'flex';
-    }
-
-    function showLeaderboard() {
-      lbX.textContent = stats.x;
-      lbO.textContent = stats.o;
-      lbDraws.textContent = stats.draws;
-      leaderboardEl.classList.add('show');
-    }
-
-    function hideLeaderboard() {
-      leaderboardEl.classList.remove('show');
-    }
-
-    function handleMove(i) {
-      if (board[i] || gameOver) return;
-      board[i] = currentPlayer;
-      const winLine = checkWinner();
-      if (winLine) {
-        gameOver = true;
-        winningLine = winLine;
-        statusEl.textContent = 'Player ' + currentPlayer + ' wins!';
-        recordResult(currentPlayer);
-        playWin();
-        render();
-        showGameOver('Player ' + currentPlayer + ' wins!', currentPlayer.toLowerCase());
-      } else if (board.every(cell => cell)) {
-        gameOver = true;
-        statusEl.textContent = "It's a draw!";
-        recordResult(null);
-        playDraw();
-        render();
-        showGameOver("It's a draw!", '');
-      } else {
-        playMove();
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        statusEl.textContent = 'Player ' + currentPlayer + "'s turn";
-        render();
-      }
-    }
-
-    function reset() {
-      board = Array(9).fill(null);
-      currentPlayer = 'X';
-      gameOver = false;
-      winningLine = null;
-      statusEl.textContent = "Player X's turn";
-      render();
-    }
-
-    function startGame() {
-      titleScreen.style.display = 'none';
-      gameEl.classList.remove('hidden');
-      reset();
-    }
-
-    startBtn.addEventListener('click', startGame);
-    resetBtn.addEventListener('click', reset);
-    leaderboardBtn.addEventListener('click', showLeaderboard);
-    leaderboardClose.addEventListener('click', hideLeaderboard);
-    playAgainBtn.addEventListener('click', playAgain);
-    toMenuBtn.addEventListener('click', toMenu);
-  </script>
+      <button id="options-close">Close</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
