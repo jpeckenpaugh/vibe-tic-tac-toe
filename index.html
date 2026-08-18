@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic-Tac-Toe</title>
   <style>
+    :root {
+      --cell-size: 100px;
+      --cell-font: 2.5rem;
+      --gap: 8px;
+      --title-size: 4rem;
+      --subtitle-size: 1.2rem;
+      --status-size: 1.2rem;
+    }
+    @media (min-width: 900px) {
+      :root {
+        --cell-size: 140px;
+        --cell-font: 3.6rem;
+        --gap: 12px;
+        --title-size: 5.5rem;
+        --subtitle-size: 1.6rem;
+        --status-size: 1.6rem;
+      }
+    }
+    @media (min-width: 1400px) {
+      :root {
+        --cell-size: 180px;
+        --cell-font: 4.6rem;
+        --gap: 16px;
+        --title-size: 7rem;
+        --subtitle-size: 2rem;
+        --status-size: 2rem;
+      }
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       display: flex;
@@ -19,21 +47,21 @@
       color: #1e293b;
     }
     #status {
-      font-size: 1.2rem;
+      font-size: var(--status-size);
       margin-bottom: 16px;
       color: #475569;
       min-height: 1.5em;
     }
     #board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-template-rows: repeat(3, 100px);
-      gap: 8px;
+      grid-template-columns: repeat(3, var(--cell-size));
+      grid-template-rows: repeat(3, var(--cell-size));
+      gap: var(--gap);
     }
     .cell {
-      width: 100px;
-      height: 100px;
-      font-size: 2.5rem;
+      width: var(--cell-size);
+      height: var(--cell-size);
+      font-size: var(--cell-font);
       font-weight: bold;
       border: none;
       border-radius: 8px;
@@ -45,6 +73,22 @@
     }
     .cell:hover:not(:disabled) {
       background: #e2e8f0;
+    }
+    .cell.preview:hover::after {
+      content: var(--preview, '');
+      opacity: 0.25;
+    }
+    .cell.win {
+      background: #dcfce7;
+      box-shadow: 0 0 0 3px #22c55e, 0 2px 6px rgba(0, 0, 0, 0.1);
+      animation: win-pulse 0.6s ease-in-out infinite alternate;
+    }
+    .cell.dim {
+      opacity: 0.3;
+    }
+    @keyframes win-pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
     }
     .cell.x {
       color: #2563eb;
@@ -82,14 +126,14 @@
       z-index: 10;
     }
     #title-screen h1 {
-      font-size: 4rem;
+      font-size: var(--title-size);
       color: #ffffff;
       margin: 0 0 8px;
     }
     #title-screen p {
       color: #94a3b8;
       margin: 0 0 40px;
-      font-size: 1.2rem;
+      font-size: var(--subtitle-size);
     }
     #start {
       padding: 14px 40px;
@@ -103,6 +147,16 @@
     }
     #start:hover {
       background: #1d4ed8;
+    }
+    @media (min-width: 900px) {
+      #start, #leaderboard-btn {
+        font-size: 1.6rem;
+        padding: 16px 48px;
+      }
+      #reset {
+        font-size: 1.4rem;
+        padding: 14px 32px;
+      }
     }
     #leaderboard-btn {
       margin-top: 16px;
@@ -208,6 +262,33 @@
       color: #64748b;
       font-size: 1.1rem;
     }
+    .game-over-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .game-over-actions button {
+      padding: 10px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #play-again {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    #play-again:hover {
+      background: #1d4ed8;
+    }
+    #to-menu {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+    #to-menu:hover {
+      background: #cbd5e1;
+    }
     @keyframes pop-in {
       from { transform: scale(0.5); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
@@ -232,7 +313,11 @@
   <div id="game-over">
     <div class="game-over-box">
       <h2 id="game-over-title"></h2>
-      <p>Returning to title screen...</p>
+      <p id="game-over-sub">Game over</p>
+      <div class="game-over-actions">
+        <button id="play-again">Play Again</button>
+        <button id="to-menu">Menu</button>
+      </div>
     </div>
   </div>
 
@@ -270,6 +355,43 @@
     const lbX = document.getElementById('lb-x');
     const lbO = document.getElementById('lb-o');
     const lbDraws = document.getElementById('lb-draws');
+    const playAgainBtn = document.getElementById('play-again');
+    const toMenuBtn = document.getElementById('to-menu');
+
+    let audioCtx = null;
+    function ensureAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+    function playTone(freq, duration, type, gainValue, when) {
+      try {
+        const ctx = ensureAudio();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const t = ctx.currentTime + (when || 0);
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(gainValue || 0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + duration);
+      } catch (e) {}
+    }
+    function playMove() {
+      playTone(440, 0.08, 'triangle', 0.15);
+    }
+    function playWin() {
+      playTone(523, 0.15, 'sine', 0.2);
+      playTone(659, 0.15, 'sine', 0.2, 0.15);
+      playTone(784, 0.25, 'sine', 0.2, 0.3);
+    }
+    function playDraw() {
+      playTone(330, 0.12, 'sine', 0.15);
+      playTone(294, 0.2, 'sine', 0.15, 0.15);
+    }
 
     const STORAGE_KEY = 'tic-tac-toe-stats';
     let stats = loadStats();
@@ -302,6 +424,7 @@
     let board = Array(9).fill(null);
     let currentPlayer = 'X';
     let gameOver = false;
+    let winningLine = null;
 
     const winLines = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -313,9 +436,17 @@
       boardEl.innerHTML = '';
       board.forEach((value, i) => {
         const cell = document.createElement('button');
-        cell.className = 'cell' + (value ? ' ' + value.toLowerCase() : '');
+        const isWinCell = winningLine && winningLine.includes(i);
+        cell.className = 'cell'
+          + (value ? ' ' + value.toLowerCase() : '')
+          + (isWinCell ? ' win' : '')
+          + (winningLine && !isWinCell ? ' dim' : '');
         cell.textContent = value || '';
         cell.disabled = !!value || gameOver;
+        if (!value && !gameOver) {
+          cell.classList.add('preview');
+          cell.style.setProperty('--preview', currentPlayer);
+        }
         cell.addEventListener('click', () => handleMove(i));
         boardEl.appendChild(cell);
       });
@@ -325,7 +456,7 @@
       for (const line of winLines) {
         const [a, b, c] = line;
         if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-          return board[a];
+          return line;
         }
       }
       return null;
@@ -335,7 +466,21 @@
       gameOverTitle.textContent = title;
       gameOverTitle.className = colorClass;
       gameOverEl.classList.add('show');
-      setTimeout(returnToTitle, 2500);
+    }
+
+    function hideGameOver() {
+      gameOverEl.classList.remove('show');
+    }
+
+    function playAgain() {
+      hideGameOver();
+      reset();
+    }
+
+    function toMenu() {
+      hideGameOver();
+      gameEl.classList.add('hidden');
+      titleScreen.style.display = 'flex';
     }
 
     function showLeaderboard() {
@@ -349,37 +494,38 @@
       leaderboardEl.classList.remove('show');
     }
 
-    function returnToTitle() {
-      gameOverEl.classList.remove('show');
-      gameEl.classList.add('hidden');
-      titleScreen.style.display = 'flex';
-    }
-
     function handleMove(i) {
       if (board[i] || gameOver) return;
       board[i] = currentPlayer;
-      const winner = checkWinner();
-      if (winner) {
+      const winLine = checkWinner();
+      if (winLine) {
         gameOver = true;
-        statusEl.textContent = 'Player ' + winner + ' wins!';
-        recordResult(winner);
-        showGameOver('Player ' + winner + ' wins!', winner.toLowerCase());
+        winningLine = winLine;
+        statusEl.textContent = 'Player ' + currentPlayer + ' wins!';
+        recordResult(currentPlayer);
+        playWin();
+        render();
+        showGameOver('Player ' + currentPlayer + ' wins!', currentPlayer.toLowerCase());
       } else if (board.every(cell => cell)) {
         gameOver = true;
         statusEl.textContent = "It's a draw!";
         recordResult(null);
+        playDraw();
+        render();
         showGameOver("It's a draw!", '');
       } else {
+        playMove();
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         statusEl.textContent = 'Player ' + currentPlayer + "'s turn";
+        render();
       }
-      render();
     }
 
     function reset() {
       board = Array(9).fill(null);
       currentPlayer = 'X';
       gameOver = false;
+      winningLine = null;
       statusEl.textContent = "Player X's turn";
       render();
     }
@@ -394,6 +540,8 @@
     resetBtn.addEventListener('click', reset);
     leaderboardBtn.addEventListener('click', showLeaderboard);
     leaderboardClose.addEventListener('click', hideLeaderboard);
+    playAgainBtn.addEventListener('click', playAgain);
+    toMenuBtn.addEventListener('click', toMenu);
   </script>
 </body>
 </html>
