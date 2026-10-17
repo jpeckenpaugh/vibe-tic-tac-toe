@@ -5,9 +5,9 @@
 
 ### 👉 [**▶ Play Live in Your Browser (`v-ttt.livive.net`)**](https://v-ttt.livive.net/)
 
-[![Play Vibe Tic-Tac-Toe](docs/screenshot-title.png)](https://v-ttt.livive.net/)
+[![Play Vibe Tic-Tac-Toe](demos/latest/gallery/title.png)](https://v-ttt.livive.net/)
 
-[**▶ Play Live (`v-ttt.livive.net`)**](https://v-ttt.livive.net/) · [**📺 Featured on Livive.net**](https://beta.livive.net/#project=vibe-tic-tac-toe)
+[**▶ Play Live (`v-ttt.livive.net`)**](https://v-ttt.livive.net/) · [**🎬 Watch 30s Gameplay Reel**](https://v-ttt.livive.net/demos/latest/demo.webm) · [**📺 Featured on Livive.net**](https://beta.livive.net/#project=vibe-tic-tac-toe)
 
 ---
 
@@ -33,7 +33,7 @@ Because everyone already knows the rules of Tic-Tac-Toe, it serves as the **cont
 4. **Customize the Vibe:** Click **Options** on the title screen to switch between **6 Piece Themes** (`Classic X/O`, `🐱 Cats & Dogs`, `⭐ Stars & Moon`, `⚔️ Swords & Shields`, `❤️ Hearts`, `🍕 Pizza & Burger`), pick custom hex colors for X and O, or toggle synthesized sound effects.
 5. **Track the Rivalry:** Click **Leaderboard** to view cumulative `X` wins, `O` wins, and draws persisted in `localStorage`.
 
-![Gameplay](docs/screenshot-game.png)
+![Swords & Shields Gameplay Win](demos/latest/gallery/swords.png)
 
 ---
 
@@ -62,13 +62,22 @@ cd vibe-tic-tac-toe
 
 Then open **`http://localhost:8080`** in your browser (or open `index.html` directly).
 
+### Automated Smoke Test & 30s 720p Showcase Recorder
+
+```bash
+./test-runner/run.sh              # Fast headless Playwright smoke test
+./test-runner/run.sh --showcase   # Record 30s 720p WebM demo + 6 gallery stills
+```
+
 ### Repository Layout
 
 ```text
 vibe-tic-tac-toe/
-├── index.html   # Title screen, 3x3 board, Leaderboard, Options & About modals
-├── style.css    # Responsive viewport scaling, win-pop animations & confetti
-├── script.js    # Turn logic, theme/color persistence & Web Audio synth effects
-├── run.sh       # Starts a local Python HTTP server on port 8080
-└── docs/        # Screenshots and OpenCode session token/cost receipt
+├── index.html       # Title screen, 3x3 board, Leaderboard, Options & About modals
+├── style.css        # Responsive viewport scaling, win-pop animations & confetti
+├── script.js        # Turn logic, theme/color persistence & Web Audio synth effects
+├── demos/latest/    # Published 30s 720p gameplay reel (demo.webm) & gallery/*.png
+├── test-runner/     # Dockerized Playwright smoke test & 720p showcase recorder
+├── docs/            # Historical screenshots & OpenCode session token/cost receipt
+└── run.sh           # Starts a local Python HTTP server on port 8080
 ```
